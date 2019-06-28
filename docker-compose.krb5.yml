@@ -1,0 +1,36 @@
+version: '3.6'
+
+x-proxy: &proxy
+  http_proxy: ${http_proxy}
+  https_proxy: ${https_proxy}
+  no_proxy: ${no_proxy}
+
+services:
+  krb5-server:
+    build:
+      context: ./services/krb5-server
+      args:
+        <<: *proxy
+    hostname: server
+    domainname: krb5.local
+    env_file: ./services/krb5-server/.env
+    environment:
+      <<: *proxy
+    ports:
+      - target: 88
+        published: 88
+        protocol: tcp
+      - target: 749
+        published: 749
+        protocol: tcp
+      - target: 9001
+        published: 9001
+        protocol: tcp
+    networks:
+      - workbench
+    restart: always
+
+networks:
+  workbench:
+    name: workbench
+    external: true

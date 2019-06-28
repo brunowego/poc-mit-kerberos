@@ -1,0 +1,3 @@
+/services/through-keytab/keytabs/*.keytab
+
+/.env

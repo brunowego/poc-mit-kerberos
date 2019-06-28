@@ -1,0 +1,61 @@
+version: '3.6'
+
+x-proxy: &proxy
+  http_proxy: ${http_proxy}
+  https_proxy: ${https_proxy}
+  no_proxy: ${no_proxy}
+
+services:
+  through-password:
+    build:
+      context: ./services/through-password
+      args:
+        <<: *proxy
+    hostname: through-password
+    domainname: krb5.local
+    environment:
+      <<: *proxy
+    networks:
+      - workbench
+    restart: always
+
+  through-pam:
+    build:
+      context: ./services/through-pam
+      args:
+        <<: *proxy
+    hostname: through-pam
+    domainname: krb5.local
+    environment:
+      <<: *proxy
+    networks:
+      - workbench
+    restart: always
+
+  through-keytab:
+    build:
+      context: ./services/through-keytab
+      args:
+        <<: *proxy
+    hostname: through-keytab
+    domainname: krb5.local
+    volumes:
+      - type: bind
+        source: ./services/through-keytab/keytabs
+        target: /etc/security/keytabs
+    environment:
+      <<: *proxy
+    ports:
+      - target: 22
+        published: 2222
+        protocol: tcp
+    networks:
+      - workbench
+    restart: always
+    depends_on:
+      - krb5-server
+
+networks:
+  workbench:
+    name: workbench
+    external: true
